@@ -10,21 +10,23 @@ import streamlit as st
 from config import *
 from prompts import *
 
-
+# Vector Store
 @st.cache_resource
-def initialize_rag_system():
-
-    # Vector Store
-    vectorstore = Chroma(
+def initialize_vectorstore():
+    return Chroma(
         embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
         persist_directory=CHROMA_DB_PATH
     )
+
+@st.cache_resource
+def initialize_rag_system():
 
     # Modelos
     llm_query = OllamaLLM(model=QUERY_MODEL, temperature=0)
     llm_generation = OllamaLLM(model=GENERATION_MODEL, temperature=0)
 
     # Retriever MMR (Maximal Marginal Relevance)
+    vectorstore = initialize_vectorstore()
     base_retriever = vectorstore.as_retriever(
         search_type=SEARCH_TYPE,
         search_kwargs={
@@ -99,8 +101,12 @@ def initialize_rag_system():
 
 def query_rag(question: str):
     try:
-        ragchain, retriever = initialize_rag_system()
+        data = get_data_vectorstore()
+        docs = data["documents"]
+        if not docs:
+            return "La base de datos de documentos está vacía. Por favor, cargue documentos antes de realizar consultas.", []
 
+        ragchain, retriever = initialize_rag_system()
         # Obtener la respuesta del sistema RAG
         response = ragchain.invoke(question)
 
@@ -134,3 +140,7 @@ def get_retriever_info():
         "candidatos": MMR_FETCH_K,
         "umbral": SIMILARITY_THRESHOLD if ENABLE_HYBRID_RETRIEVER else "N/A"
     }
+
+def get_data_vectorstore():
+    """Función para obtener y mostrar documentos almacenados."""
+    return initialize_vectorstore().get()

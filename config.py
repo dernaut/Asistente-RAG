@@ -6,6 +6,9 @@ GENERATION_MODEL = "deepseek-r1:latest"
 # Configuración del vector store
 CHROMA_DB_PATH = "C:\\Users\\jgiraldoc\\proyecto_langchain_python3_13\\Tema 3\\chroma_db"
 
+# Configuración documentos
+DOCUMENTS_PATH = "C:\\Users\\jgiraldoc\\proyecto_langchain_python3_13\\Tema 3\\contratos"
+
 # Configuración del retriever
 SEARCH_TYPE = "mmr"
 SEARCH_TYPE_K = 2
